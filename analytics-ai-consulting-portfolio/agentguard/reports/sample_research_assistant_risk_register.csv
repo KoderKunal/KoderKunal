@@ -1,0 +1,11 @@
+risk_id,risk,layer,inherent_score,inherent_band,control_effectiveness_pct,control_maturity_coverage_pct,tested_control_count,mapped_control_count,residual_score,residual_band,mandatory_control_gaps
+ASI06,Memory and Context Poisoning,Memory / retrieval,40.0,Moderate,21.8,25.0,0,5,31.28,Moderate,C06;C04
+ASI09,Human-Agent Trust Exploitation,Human oversight / output,33.75,Moderate,19.0,25.0,0,4,27.34,Moderate,C03
+ASI04,Agentic Supply Chain Vulnerabilities,Dependencies / tools / models,35.0,Moderate,32.3,35.0,0,5,23.69,Low,C11
+ASI01,Agent Goal Hijack,Instruction / context,31.25,Moderate,28.3,30.0,0,5,22.42,Low,C04;C02
+ASI03,Identity and Privilege Abuse,Identity / access,31.25,Moderate,33.6,35.0,0,5,20.76,Low,C01;C02
+ASI02,Tool Misuse and Exploitation,Tools / actions,23.75,Low,37.4,33.3,0,6,14.87,Low,C02;C01
+ASI08,Cascading Failures,Orchestration / reliability,20.0,Low,28.3,30.0,0,5,14.35,Low,C08;C09
+ASI10,Rogue Agents,Runtime / governance,22.5,Low,36.9,33.3,0,6,14.2,Low,C01;C02;C12
+ASI05,Unexpected Code Execution (RCE),Runtime / execution,16.25,Low,36.2,33.3,0,6,10.37,Low,C05;C02
+ASI07,Insecure Inter-Agent Communication,Multi-agent orchestration,6.25,Low,29.3,30.0,0,5,4.42,Low,C07;C01
