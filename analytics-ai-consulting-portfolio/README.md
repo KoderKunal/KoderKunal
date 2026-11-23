@@ -33,7 +33,7 @@ A rule-based, explainable risk assessment prototype covering ten OWASP Agentic A
 
 AgentGuard scores are heuristic indices, not calibrated probabilities or evidence of security certification. It includes a Python scoring engine, interactive Streamlit dashboard, ten-category risk taxonomy, twelve-control catalogue, evidence register, controlled test plan and sample assessments.
 
-## Tested outputs from synthetic generators
+### 4. [WorkLedger — Employee Operations & Project Delivery Portal](../employee-ops-portal/README.md)\n\nA multi-user React/Supabase portal scaffold for individual sign-in, attendance sessions, daily progress, task trackers, work-hour logs, project requirements, deliverable review, manager dashboards and a bounded read-only reporting agent. The portal source and setup guide are available in the repository; the live sign-in service needs an administrator-configured Supabase project and GitHub Pages secrets.\n\n## Tested outputs from synthetic generators
 
 | Project | Metric | Result |
 |---|---|---:|
