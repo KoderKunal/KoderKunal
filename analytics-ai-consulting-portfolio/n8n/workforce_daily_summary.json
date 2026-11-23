@@ -1,0 +1,135 @@
+{
+  "name": "Workforce Analytics - Daily Aggregate Summary",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "workforce-manual",
+      "name": "Manual Test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "workforce-schedule",
+      "name": "Daily Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT department, COUNT(*) AS headcount, SUM(attrition) AS leavers, ROUND(100*AVG(attrition),2) AS attrition_rate_pct FROM employees GROUP BY department ORDER BY attrition_rate_pct DESC;"
+      },
+      "id": "workforce-mysql",
+      "name": "MySQL - Department KPIs",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        480,
+        350
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$input.all().map(x=>x.json); return [{json:{prompt:'Summarise these synthetic department-level workforce metrics for a human analyst. Do not make individual employment recommendations or claim causation. Evidence: '+JSON.stringify(rows)}}];"
+      },
+      "id": "workforce-prompt",
+      "name": "Build Aggregate Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        350
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: 'qwen2.5:3b', prompt: $json.prompt, stream: false } }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "workforce-ollama",
+      "name": "Ollama - Draft Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        350
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Test": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Department KPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Schedule": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Department KPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Department KPIs": {
+      "main": [
+        [
+          {
+            "node": "Build Aggregate Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Aggregate Prompt": {
+      "main": [
+        [
+          {
+            "node": "Ollama - Draft Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "workforce-analytics-v1",
+  "tags": []
+}
