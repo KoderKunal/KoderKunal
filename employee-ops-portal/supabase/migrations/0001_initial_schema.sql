@@ -236,6 +236,30 @@ grant execute on function private.is_manager_or_admin(uuid) to authenticated;
 grant execute on function private.is_admin(uuid) to authenticated;
 grant execute on function private.is_active_member(uuid) to authenticated;
 
+ 
+-- Server timestamp only; employees cannot choose their own check-out time.
+create or replace function public.checkout_attendance(p_session_id uuid)
+returns void language plpgsql security definer set search_path = ''
+as $checkout$
+declare v_session public.attendance_sessions%rowtype;
+begin
+  select * into v_session from public.attendance_sessions where id = p_session_id for update;
+  if not found then raise exception 'Attendance session not found'; end if;
+  if v_session.user_id <> (select auth.uid()) then
+    raise exception 'Employees can only check out their own attendance session';
+  end if;
+  if not private.is_active_member(v_session.organization_id) then
+    raise exception 'Inactive or unrelated organisation member';
+  end if;
+  if v_session.checked_out_at is not null then
+    raise exception 'Attendance session is already closed';
+  end if;
+  update public.attendance_sessions set checked_out_at = now() where id = p_session_id;
+end;
+$checkout$;
+revoke all on function public.checkout_attendance(uuid) from public, anon;
+grant execute on function public.checkout_attendance(uuid) to authenticated;
+
 -- Task progress updates are constrained to safe employee-editable fields.
 create or replace function public.update_task_progress(
   p_task_id uuid, p_status text, p_percent_complete integer,
@@ -291,11 +315,15 @@ revoke all on public.organizations,public.profiles,public.projects,public.projec
 grant select on public.organizations,public.profiles,public.projects,public.project_requirements,
  public.tasks,public.attendance_sessions,public.work_logs,public.progress_updates,
  public.deliverables,public.review_cycles,public.audit_events to authenticated;
-grant insert on public.projects,public.project_requirements,public.tasks,
- public.attendance_sessions,public.work_logs,public.progress_updates,public.deliverables,
- public.review_cycles,public.audit_events to authenticated;
+grant insert on public.projects,public.project_requirements,public.tasks to authenticated;
+revoke insert on public.attendance_sessions,public.work_logs,public.progress_updates,public.deliverables,public.review_cycles,public.audit_events from authenticated;
+grant insert (organization_id,user_id,note) on public.attendance_sessions to authenticated;
+grant insert (organization_id,user_id,project_id,task_id,work_date,hours,summary) on public.work_logs to authenticated;
+grant insert (organization_id,user_id,project_id,update_date,accomplished,next_steps,blockers) on public.progress_updates to authenticated;
+grant insert (organization_id,project_id,task_id,title,description,url,submitted_by) on public.deliverables to authenticated;
+grant insert (organization_id,employee_id,initiated_by,title,purpose,evidence_summary,due_date) on public.review_cycles to authenticated;
 grant update (full_name,timezone) on public.profiles to authenticated;
-grant update (checked_out_at,note) on public.attendance_sessions to authenticated;
+revoke update on public.attendance_sessions from authenticated;
 grant update (status,manager_feedback,reviewed_by,reviewed_at) on public.deliverables to authenticated;
 grant update (employee_response,status) on public.review_cycles to authenticated;
 grant update (evidence_summary,status,closed_at) on public.review_cycles to authenticated;
@@ -344,7 +372,12 @@ with check (user_id = (select auth.uid()) or private.is_manager_or_admin(organiz
 create policy work_logs_read_self_or_manager on public.work_logs for select to authenticated
 using (user_id = (select auth.uid()) or private.is_manager_or_admin(organization_id));
 create policy work_logs_insert_self on public.work_logs for insert to authenticated
-with check (user_id = (select auth.uid()) and private.is_active_member(organization_id));
+with check (
+  user_id = (select auth.uid()) and private.is_active_member(organization_id)
+  and (task_id is null or exists (
+    select 1 from public.tasks t where t.id = task_id and t.assigned_to = (select auth.uid())
+  ))
+);
 
 create policy progress_read_self_or_manager on public.progress_updates for select to authenticated
 using (user_id = (select auth.uid()) or private.is_manager_or_admin(organization_id));
@@ -354,7 +387,13 @@ with check (user_id = (select auth.uid()) and private.is_active_member(organizat
 create policy deliverables_read_self_or_manager on public.deliverables for select to authenticated
 using (submitted_by = (select auth.uid()) or private.is_manager_or_admin(organization_id));
 create policy deliverables_insert_self on public.deliverables for insert to authenticated
-with check (submitted_by = (select auth.uid()) and status = 'submitted' and reviewed_by is null and private.is_active_member(organization_id));
+with check (
+  submitted_by = (select auth.uid()) and status = 'submitted'
+  and reviewed_by is null and private.is_active_member(organization_id)
+  and (task_id is null or exists (
+    select 1 from public.tasks t where t.id = task_id and t.assigned_to = (select auth.uid())
+  ))
+);
 create policy deliverables_review_manager on public.deliverables for update to authenticated
 using (private.is_manager_or_admin(organization_id))
 with check (private.is_manager_or_admin(organization_id));
