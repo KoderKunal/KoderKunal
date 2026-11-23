@@ -1,0 +1,135 @@
+{
+  "name": "AI Value Portfolio - Daily Sector Summary",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "portfolio-manual",
+      "name": "Manual Test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "portfolio-schedule",
+      "name": "Daily Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT sector, COUNT(*) AS initiative_count, ROUND(AVG(implementation_cost_lakh),2) AS avg_cost_lakh, ROUND(AVG(realised_annual_benefit_lakh),2) AS avg_benefit_lakh, ROUND(AVG(roi_pct),2) AS avg_roi_pct, ROUND(AVG(data_readiness_score),2) AS avg_readiness, ROUND(AVG(governance_risk_score),2) AS avg_risk FROM ai_initiatives GROUP BY sector ORDER BY avg_roi_pct DESC;"
+      },
+      "id": "portfolio-mysql",
+      "name": "MySQL - Sector KPIs",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        480,
+        350
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$input.all().map(x=>x.json); return [{json:{prompt:'Summarise these synthetic AI-initiative sector metrics for a human review committee. Explain cost, benefit, ROI, readiness and risk trade-offs. Do not describe synthetic ROI as guaranteed savings. Evidence: '+JSON.stringify(rows)}}];"
+      },
+      "id": "portfolio-prompt",
+      "name": "Build Aggregate Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        350
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: 'qwen2.5:3b', prompt: $json.prompt, stream: false } }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "portfolio-ollama",
+      "name": "Ollama - Draft Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        350
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Test": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Sector KPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Schedule": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Sector KPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Sector KPIs": {
+      "main": [
+        [
+          {
+            "node": "Build Aggregate Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Aggregate Prompt": {
+      "main": [
+        [
+          {
+            "node": "Ollama - Draft Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ai-portfolio-v1",
+  "tags": []
+}
