@@ -1,0 +1,13 @@
+control_id,control_name,control_owner,implementation_status,maturity_self_assessment,evidence_reference,last_tested_date,test_result,known_exception,remediation_owner,target_date,reviewer
+C01,Least-privilege identity and short-lived credentials,,,,,,,,,,
+C02,Tool allowlist and schema validation,,,,,,,,,,
+C03,Human approval for consequential actions,,,,,,,,,,
+C04,Trusted-instruction boundary and prompt-injection handling,,,,,,,,,,
+C05,Sandboxing and egress restrictions,,,,,,,,,,
+C06,Memory provenance write controls and retention,,,,,,,,,,
+C07,Authenticated inter-agent communication and typed contracts,,,,,,,,,,
+C08,Rate limits timeouts budgets and circuit breakers,,,,,,,,,,
+C09,Tamper-evident audit logs and end-to-end traces,,,,,,,,,,
+C10,Output validation DLP and privacy filtering,,,,,,,,,,
+C11,Supply-chain verification and dependency governance,,,,,,,,,,
+C12,Continuous evaluation red-team tests and incident response,,,,,,,,,,
