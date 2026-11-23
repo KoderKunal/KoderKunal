@@ -4,7 +4,7 @@ A multi-user employee operations portal for attendance sessions, daily updates, 
 
 **Frontend:** React + TypeScript + Vite  
 **Authentication and database:** Supabase Auth + PostgreSQL  
-**Hosting target:** GitHub Pages  
+**Hosting:** GitHub Pages (deployment workflow succeeded)  
 **Reporting:** Read-only, allow-listed, multi-step reporting agent  
 **Roles:** employee, manager, admin
 
@@ -59,9 +59,9 @@ The intended GitHub Pages URL is:
 
 https://koderkunal.github.io/KoderKunal/
 
-**Current status:** frontend TypeScript/production build passes and the database migration passes a PostgreSQL 16 smoke test in GitHub Actions. The live deployment is not active yet because the Supabase project URL/publishable key secrets and GitHub Pages publishing source still need administrator setup.
+**Deployment status:** the GitHub Actions build and deployment jobs both succeeded after the Supabase URL and publishable-key secrets were added. The application is published at the URL above.
 
-This URL becomes a working sign-in portal after the GitHub Pages workflow succeeds with valid Supabase settings and the database is provisioned. Until those external setup steps are completed, the hosted page will not authenticate users or contain your organisation data.
+**Still required before real use:** confirm the organisation and administrator profile in Supabase, provision employee/manager profiles, then test sign-in and role-based data isolation with separate accounts. The successful deployment proves the static application was built and published; it does not by itself prove end-to-end employee authentication or access-control behaviour.
 
 ## Local development
 
