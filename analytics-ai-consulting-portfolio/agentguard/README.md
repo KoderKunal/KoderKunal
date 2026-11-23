@@ -61,6 +61,18 @@ The control-strength values, weights and bands are AgentGuard design assumptions
 
 Defaults are illustrative starting assumptions. Replace them with a real architecture review and evidence.
 
+## Illustrative profile outputs (default assumptions)
+
+| Agent archetype | Average residual index | Highest residual index | Highest scenario band |
+|---|---:|---:|---|
+| Read-only research assistant | 18.37 | 31.28 | Moderate |
+| HR operations assistant | 42.05 | 55.70 | High |
+| Software engineering agent | 50.35 | 60.47 | High |
+
+These are deterministic outputs from the included sample ratings and control maturity assumptions. They are not measurements of deployed systems. See the sample risk registers in reports/.
+
+A what-if run that sets every mapped control for the software engineering profile to maturity 3 (tested with evidence) changes the example average from 50.35 to 28.52 and the maximum from 60.47 to 32.58. This is a model-sensitivity illustration, not evidence of actual control effectiveness or risk reduction.
+
 ## Run locally
 Python 3.10+:
 
@@ -80,6 +92,15 @@ On Windows PowerShell, activate with .venv\Scripts\Activate.ps1.
 - CSV risk register and JSON assessment export
 - Safe, controlled red-team test plan in data/red_team_test_plan.csv
 - Control evidence register template
+
+## Reports and evidence templates
+
+- reports/sample_research_assistant_risk_register.csv
+- reports/sample_hr_operations_risk_register.csv
+- reports/sample_software_engineering_risk_register.csv
+- reports/sample_control_what_if.csv
+- data/control_evidence_register_template.csv
+- data/red_team_test_plan.csv
 
 ## Tests
 Run:
