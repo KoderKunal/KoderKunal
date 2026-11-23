@@ -14,7 +14,7 @@ Postgraduate candidate in Global Business Operations at Shri Ram College of Comm
 
 ## Featured analytics portfolio
 
-I am building reproducible, end-to-end portfolio projects that connect business questions to descriptive, diagnostic, predictive and prescriptive analytics.
+This repository contains reproducible portfolio projects that connect business questions to descriptive, diagnostic, predictive and prescriptive analytics.
 
 | Project | Business question | Methods and tools |
 |---|---|---|
@@ -28,6 +28,11 @@ I am building reproducible, end-to-end portfolio projects that connect business 
 - **Evalueserve — Junior Analyst, IP Research & Development:** analysed 500+ technical documents per day at 95%+ accuracy; delivered structured research across prior art, landscape, FTO, whitespace, validity and state-of-the-art studies; supported whitespace analysis and GTM inputs.
 - **CSIR–IGIB — Research Intern:** used Python (Pandas, NumPy, Matplotlib), Linux shell scripting and basic R for computational research and data analysis.
 - **EY–SRCC AI VIBE:** selected for the inaugural cohort of the 12-month applied AI programme.
+
+## Selected publications
+
+- Ahmad, N., Dugad, S., Chauhan, V., Ahmed, S., **Sharma, K.**, et al. (2022). *Allosteric cooperation in β-lactam binding to a non-classical transpeptidase*. eLife, 11:e73055. [DOI](https://doi.org/10.7554/eLife.73055). Kunal Sharma is the fifth listed author.
+- **Sharma, K.**, Noor Khan, N., Sana, H.B., Khan, M.A., & Kumar, P. (2020). *Non-Synonymous Mutation Analysis in SARS-CoV-2 Variants Isolated from Humans and Prediction of Conserved Linear Antibody Epitopes for Use in Country-wise Epitope-Based Vaccine Development*. Preprints.org. [DOI](https://doi.org/10.20944/preprints202006.0024.v1). This is a preprint, not a peer-reviewed publication.
 
 ## Current focus
 
