@@ -323,6 +323,7 @@ grant insert (organization_id,user_id,project_id,update_date,accomplished,next_s
 grant insert (organization_id,project_id,task_id,title,description,url,submitted_by) on public.deliverables to authenticated;
 grant insert (organization_id,employee_id,initiated_by,title,purpose,evidence_summary,due_date) on public.review_cycles to authenticated;
 grant update (full_name,timezone) on public.profiles to authenticated;
+grant update (requirement,acceptance_criteria,priority,due_date,status,owner_id) on public.project_requirements to authenticated;
 revoke update on public.attendance_sessions from authenticated;
 grant update (status,manager_feedback,reviewed_by,reviewed_at) on public.deliverables to authenticated;
 grant update (employee_response,status) on public.review_cycles to authenticated;
