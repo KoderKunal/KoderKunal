@@ -422,7 +422,7 @@ with check (actor_id = (select auth.uid()) and private.is_active_member(organiza
 -- access tokens, full deliverable content or sensitive employee narrative.
 create or replace function private.write_audit_event()
 returns trigger language plpgsql security definer set search_path = ''
-as $
+as $audit$
 declare
   v_org uuid;
   v_entity uuid;
@@ -442,7 +442,7 @@ begin
     return NEW;
   end if;
 end;
-$;
+$audit$;
 revoke all on function private.write_audit_event() from public, anon, authenticated;
 
 create trigger audit_projects after insert or update or delete on public.projects
