@@ -1,0 +1,25 @@
+name: WorkLedger frontend validation
+on:
+  push:
+    paths:
+      - 'employee-ops-portal/**'
+      - '.github/workflows/test-workledger.yml'
+  pull_request:
+    paths:
+      - 'employee-ops-portal/**'
+      - '.github/workflows/test-workledger.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: employee-ops-portal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript check and Vite production build
+        run: npm run build
