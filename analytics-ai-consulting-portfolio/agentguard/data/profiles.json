@@ -1,0 +1,307 @@
+{
+  "profiles": [
+    {
+      "id": "research_assistant",
+      "name": "Read-only research assistant",
+      "description": "Retrieves public and internal knowledge sources and drafts summaries; no direct write, payment or deployment authority.",
+      "ratings": {
+        "ASI01": {
+          "likelihood": 3,
+          "impact": 2,
+          "privilege": 1,
+          "autonomy": 2,
+          "exposure": 4,
+          "blast_radius": 2
+        },
+        "ASI02": {
+          "likelihood": 2,
+          "impact": 2,
+          "privilege": 1,
+          "autonomy": 2,
+          "exposure": 3,
+          "blast_radius": 2
+        },
+        "ASI03": {
+          "likelihood": 2,
+          "impact": 3,
+          "privilege": 2,
+          "autonomy": 2,
+          "exposure": 2,
+          "blast_radius": 2
+        },
+        "ASI04": {
+          "likelihood": 2,
+          "impact": 3,
+          "privilege": 2,
+          "autonomy": 2,
+          "exposure": 3,
+          "blast_radius": 2
+        },
+        "ASI05": {
+          "likelihood": 1,
+          "impact": 3,
+          "privilege": 1,
+          "autonomy": 1,
+          "exposure": 2,
+          "blast_radius": 1
+        },
+        "ASI06": {
+          "likelihood": 3,
+          "impact": 3,
+          "privilege": 1,
+          "autonomy": 2,
+          "exposure": 4,
+          "blast_radius": 3
+        },
+        "ASI07": {
+          "likelihood": 1,
+          "impact": 2,
+          "privilege": 1,
+          "autonomy": 1,
+          "exposure": 1,
+          "blast_radius": 1
+        },
+        "ASI08": {
+          "likelihood": 2,
+          "impact": 2,
+          "privilege": 1,
+          "autonomy": 2,
+          "exposure": 2,
+          "blast_radius": 2
+        },
+        "ASI09": {
+          "likelihood": 3,
+          "impact": 3,
+          "privilege": 1,
+          "autonomy": 2,
+          "exposure": 3,
+          "blast_radius": 2
+        },
+        "ASI10": {
+          "likelihood": 1,
+          "impact": 3,
+          "privilege": 1,
+          "autonomy": 2,
+          "exposure": 2,
+          "blast_radius": 2
+        }
+      },
+      "control_maturity": {
+        "C01": 2,
+        "C02": 2,
+        "C03": 1,
+        "C04": 1,
+        "C05": 1,
+        "C06": 1,
+        "C07": 0,
+        "C08": 1,
+        "C09": 1,
+        "C10": 1,
+        "C11": 1,
+        "C12": 1
+      }
+    },
+    {
+      "id": "hr_operations_agent",
+      "name": "HR operations assistant",
+      "description": "Reads sensitive employee data and prepares record changes for approval. It must not make employment decisions autonomously.",
+      "ratings": {
+        "ASI01": {
+          "likelihood": 3,
+          "impact": 4,
+          "privilege": 3,
+          "autonomy": 3,
+          "exposure": 3,
+          "blast_radius": 4
+        },
+        "ASI02": {
+          "likelihood": 3,
+          "impact": 5,
+          "privilege": 4,
+          "autonomy": 3,
+          "exposure": 3,
+          "blast_radius": 4
+        },
+        "ASI03": {
+          "likelihood": 3,
+          "impact": 5,
+          "privilege": 4,
+          "autonomy": 3,
+          "exposure": 2,
+          "blast_radius": 4
+        },
+        "ASI04": {
+          "likelihood": 2,
+          "impact": 4,
+          "privilege": 3,
+          "autonomy": 2,
+          "exposure": 3,
+          "blast_radius": 3
+        },
+        "ASI05": {
+          "likelihood": 2,
+          "impact": 5,
+          "privilege": 3,
+          "autonomy": 2,
+          "exposure": 2,
+          "blast_radius": 4
+        },
+        "ASI06": {
+          "likelihood": 4,
+          "impact": 4,
+          "privilege": 3,
+          "autonomy": 3,
+          "exposure": 4,
+          "blast_radius": 4
+        },
+        "ASI07": {
+          "likelihood": 2,
+          "impact": 4,
+          "privilege": 3,
+          "autonomy": 2,
+          "exposure": 2,
+          "blast_radius": 3
+        },
+        "ASI08": {
+          "likelihood": 3,
+          "impact": 4,
+          "privilege": 3,
+          "autonomy": 4,
+          "exposure": 2,
+          "blast_radius": 4
+        },
+        "ASI09": {
+          "likelihood": 4,
+          "impact": 5,
+          "privilege": 3,
+          "autonomy": 3,
+          "exposure": 3,
+          "blast_radius": 4
+        },
+        "ASI10": {
+          "likelihood": 2,
+          "impact": 5,
+          "privilege": 4,
+          "autonomy": 4,
+          "exposure": 2,
+          "blast_radius": 4
+        }
+      },
+      "control_maturity": {
+        "C01": 2,
+        "C02": 2,
+        "C03": 1,
+        "C04": 1,
+        "C05": 1,
+        "C06": 1,
+        "C07": 0,
+        "C08": 1,
+        "C09": 1,
+        "C10": 1,
+        "C11": 1,
+        "C12": 1
+      }
+    },
+    {
+      "id": "software_engineering_agent",
+      "name": "Software engineering agent",
+      "description": "Reads/modifies code, invokes tests and package tooling and may open pull requests; production deployment is a separate human-controlled process.",
+      "ratings": {
+        "ASI01": {
+          "likelihood": 4,
+          "impact": 4,
+          "privilege": 4,
+          "autonomy": 4,
+          "exposure": 4,
+          "blast_radius": 4
+        },
+        "ASI02": {
+          "likelihood": 4,
+          "impact": 4,
+          "privilege": 4,
+          "autonomy": 4,
+          "exposure": 3,
+          "blast_radius": 4
+        },
+        "ASI03": {
+          "likelihood": 3,
+          "impact": 5,
+          "privilege": 4,
+          "autonomy": 4,
+          "exposure": 2,
+          "blast_radius": 4
+        },
+        "ASI04": {
+          "likelihood": 3,
+          "impact": 4,
+          "privilege": 4,
+          "autonomy": 3,
+          "exposure": 4,
+          "blast_radius": 4
+        },
+        "ASI05": {
+          "likelihood": 4,
+          "impact": 5,
+          "privilege": 5,
+          "autonomy": 4,
+          "exposure": 4,
+          "blast_radius": 5
+        },
+        "ASI06": {
+          "likelihood": 3,
+          "impact": 4,
+          "privilege": 3,
+          "autonomy": 3,
+          "exposure": 4,
+          "blast_radius": 3
+        },
+        "ASI07": {
+          "likelihood": 2,
+          "impact": 4,
+          "privilege": 3,
+          "autonomy": 3,
+          "exposure": 3,
+          "blast_radius": 3
+        },
+        "ASI08": {
+          "likelihood": 4,
+          "impact": 4,
+          "privilege": 4,
+          "autonomy": 5,
+          "exposure": 3,
+          "blast_radius": 5
+        },
+        "ASI09": {
+          "likelihood": 3,
+          "impact": 4,
+          "privilege": 3,
+          "autonomy": 3,
+          "exposure": 3,
+          "blast_radius": 3
+        },
+        "ASI10": {
+          "likelihood": 3,
+          "impact": 5,
+          "privilege": 5,
+          "autonomy": 5,
+          "exposure": 3,
+          "blast_radius": 5
+        }
+      },
+      "control_maturity": {
+        "C01": 1,
+        "C02": 2,
+        "C03": 1,
+        "C04": 1,
+        "C05": 1,
+        "C06": 1,
+        "C07": 1,
+        "C08": 1,
+        "C09": 1,
+        "C10": 1,
+        "C11": 1,
+        "C12": 1
+      }
+    }
+  ]
+}
