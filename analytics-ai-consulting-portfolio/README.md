@@ -31,7 +31,7 @@ A rule-based, explainable risk assessment prototype covering ten OWASP Agentic A
 - [References](./agentguard/REFERENCES.md)
 - [Controlled test plan](./agentguard/data/red_team_test_plan.csv)
 
-AgentGuard scores are heuristic indices, not calibrated probabilities or evidence of security certification.
+AgentGuard scores are heuristic indices, not calibrated probabilities or evidence of security certification. It includes a Python scoring engine, interactive Streamlit dashboard, ten-category risk taxonomy, twelve-control catalogue, evidence register, controlled test plan and sample assessments.
 
 ## Tested outputs from synthetic generators
 
