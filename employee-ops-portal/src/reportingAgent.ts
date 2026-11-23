@@ -5,6 +5,7 @@ export type ReportToolResult = {
   tasks: any[];
   workLogs: any[];
   deliverables: any[];
+  progressUpdates: any[];
   projects: any[];
   alerts: any[];
 };
@@ -68,6 +69,13 @@ export async function runDailyReportingAgent(
       if (error) throw error;
       return data || [];
     },
+    progressUpdates: async () => {
+      const { data, error } = await db.from("progress_updates")
+        .select("id, project_id, update_date, accomplished, next_steps, blockers, created_at")
+        .eq("user_id", selectedUser).eq("update_date", args.date);
+      if (error) throw error;
+      return data || [];
+    },
     projects: async () => {
       const { data, error } = await db.from("projects")
         .select("id, name, client_name, status")
@@ -78,8 +86,8 @@ export async function runDailyReportingAgent(
   };
 
   // Agent plan: execute its fixed, read-only tools; no model-generated SQL or actions.
-  const [attendance, tasks, workLogs, deliverables, projects] = await Promise.all([
-    tools.attendance(), tools.tasks(), tools.workLogs(), tools.deliverables(), tools.projects()
+  const [attendance, tasks, workLogs, deliverables, progressUpdates, projects] = await Promise.all([
+    tools.attendance(), tools.tasks(), tools.workLogs(), tools.deliverables(), tools.progressUpdates(), tools.projects()
   ]);
 
   const projectById = new Map(projects.map(p => [p.id, p]));
@@ -110,7 +118,7 @@ export async function runDailyReportingAgent(
   const attendanceHours = attendance.reduce((sum, x) =>
     sum + (x.checked_out_at ? hoursBetween(x.checked_in_at, x.checked_out_at) : 0), 0);
 
-  const toolResults: ReportToolResult = { attendance, tasks, workLogs, deliverables, projects, alerts };
+  const toolResults: ReportToolResult = { attendance, tasks, workLogs, deliverables, progressUpdates, projects, alerts };
 
   return {
     reportType: "Daily operational report",
@@ -129,6 +137,7 @@ export async function runDailyReportingAgent(
       blockedWorkItems: blocked.length,
       overdueWorkItems: overdue.length,
       deliverablesSubmittedToday: submittedToday.length,
+      dailyUpdatesSubmitted: progressUpdates.length,
       workItemAlerts: alerts.length
     },
     projectProgress,
@@ -136,6 +145,7 @@ export async function runDailyReportingAgent(
     openTaskTitles: open.map(t => t.title),
     workLogEntries: workLogs,
     deliverablesSubmittedToday: submittedToday,
+    dailyUpdatesSubmitted: progressUpdates,
     alerts,
     note: "Operational summary only. Alerts are attached to work items, not employee performance. No performance score, ranking, disciplinary suggestion or automated review decision is generated.",
     rawToolResults: toolResults
