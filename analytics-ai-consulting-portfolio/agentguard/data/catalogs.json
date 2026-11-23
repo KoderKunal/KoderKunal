@@ -1,0 +1,381 @@
+{
+  "dimensions": {
+    "likelihood": {
+      "label": "Likelihood",
+      "weight": 0.15
+    },
+    "impact": {
+      "label": "Business / safety impact",
+      "weight": 0.25
+    },
+    "privilege": {
+      "label": "Tool privilege",
+      "weight": 0.2
+    },
+    "autonomy": {
+      "label": "Autonomy",
+      "weight": 0.15
+    },
+    "exposure": {
+      "label": "External exposure",
+      "weight": 0.15
+    },
+    "blast_radius": {
+      "label": "Blast radius",
+      "weight": 0.1
+    }
+  },
+  "risk_bands": [
+    {
+      "min": 0,
+      "max": 24.999,
+      "label": "Low"
+    },
+    {
+      "min": 25,
+      "max": 49.999,
+      "label": "Moderate"
+    },
+    {
+      "min": 50,
+      "max": 74.999,
+      "label": "High"
+    },
+    {
+      "min": 75,
+      "max": 100,
+      "label": "Critical"
+    }
+  ],
+  "controls": [
+    {
+      "id": "C01",
+      "name": "Least-privilege identity and short-lived credentials",
+      "strength": 0.24,
+      "purpose": "Limit agent access to minimum required resources and actions.",
+      "implementation": "Use agent-specific identities, scoped short-lived credentials, separate read/write scopes, and resource-level authorization on every call.",
+      "evidence": "Permission matrix, TTL settings, access-denial and revocation tests."
+    },
+    {
+      "id": "C02",
+      "name": "Tool allowlist and schema validation",
+      "strength": 0.22,
+      "purpose": "Constrain tools and reject unsafe or malformed arguments.",
+      "implementation": "Use server-side tool allowlists, strict schemas, range checks, and business-rule validation; never rely on model-selected arguments alone.",
+      "evidence": "Tool inventory, schema tests, denied unapproved-tool calls."
+    },
+    {
+      "id": "C03",
+      "name": "Human approval for consequential actions",
+      "strength": 0.24,
+      "purpose": "Prevent unreviewed irreversible or high-impact actions.",
+      "implementation": "Require authenticated human approval before payments, external messages, HR record changes, deployments or account modifications.",
+      "evidence": "Approval config, approver identity/timestamps, reject and timeout tests."
+    },
+    {
+      "id": "C04",
+      "name": "Trusted-instruction boundary and prompt-injection handling",
+      "strength": 0.2,
+      "purpose": "Separate trusted instructions from untrusted user, retrieval and tool content.",
+      "implementation": "Label retrieved content as untrusted; preserve provenance; do not execute instructions inside documents; enforce policies outside the model.",
+      "evidence": "Indirect-injection tests, provenance labels, traces showing blocked tool actions."
+    },
+    {
+      "id": "C05",
+      "name": "Sandboxing and egress restrictions",
+      "strength": 0.23,
+      "purpose": "Contain code execution and block unauthorised network destinations.",
+      "implementation": "Use disposable least-privilege sandboxes, restricted filesystem/process/network access, egress allowlists and resource quotas.",
+      "evidence": "Sandbox settings, blocked egress tests, isolation and resource-limit results."
+    },
+    {
+      "id": "C06",
+      "name": "Memory provenance, write controls and retention",
+      "strength": 0.18,
+      "purpose": "Prevent untrusted or stale content becoming durable memory.",
+      "implementation": "Record source, author, timestamp and trust; restrict writes; apply TTL, quarantine, review and deletion.",
+      "evidence": "Memory schema, write authorization tests, provenance and deletion logs."
+    },
+    {
+      "id": "C07",
+      "name": "Authenticated inter-agent communication and typed contracts",
+      "strength": 0.19,
+      "purpose": "Prevent spoofed, replayed or malformed peer messages.",
+      "implementation": "Authenticate agent identities, validate sender/recipient/purpose, use typed schemas, and limit delegated scope.",
+      "evidence": "Agent registry, schema contract tests, spoof/replay rejection results."
+    },
+    {
+      "id": "C08",
+      "name": "Rate limits, timeouts, budgets and circuit breakers",
+      "strength": 0.2,
+      "purpose": "Contain retries, runaway loops, cascading failures and cost spikes.",
+      "implementation": "Set step/tool-call/token/cost budgets, retry ceilings, timeouts, concurrency caps and circuit breakers.",
+      "evidence": "Quota settings, retry tests, breaker telemetry and cost alerts."
+    },
+    {
+      "id": "C09",
+      "name": "Tamper-evident audit logs and end-to-end traces",
+      "strength": 0.18,
+      "purpose": "Make agent actions, approvals and delegated decisions reconstructable.",
+      "implementation": "Log principal, model/version, retrieval sources, tool inputs/outputs, policy decisions, approvals and timestamps; protect log integrity.",
+      "evidence": "End-to-end trace, retention policy, log access controls, reconstruction exercise."
+    },
+    {
+      "id": "C10",
+      "name": "Output validation, DLP and privacy filtering",
+      "strength": 0.18,
+      "purpose": "Prevent unsafe or sensitive model output reaching users or downstream systems.",
+      "implementation": "Validate output schemas/business rules, redact sensitive data, encode for destination and inspect outbound payloads.",
+      "evidence": "DLP/redaction tests, schema validation and sensitive-data canaries."
+    },
+    {
+      "id": "C11",
+      "name": "Supply-chain verification and dependency governance",
+      "strength": 0.17,
+      "purpose": "Reduce risk from frameworks, models, tools, plugins and dependencies.",
+      "implementation": "Pin and verify versions/artifact provenance, scan packages, review permissions, maintain SBOM and test upgrades.",
+      "evidence": "SBOM, lockfiles, signatures/checksums, scan results and vendor review."
+    },
+    {
+      "id": "C12",
+      "name": "Continuous evaluation, red-team tests and incident response",
+      "strength": 0.22,
+      "purpose": "Verify controls under realistic failure conditions and detect regression.",
+      "implementation": "Maintain scenario-based evaluations, monitor drift, track remediation and test rollback/kill switch.",
+      "evidence": "Dated test results, issue remediation, monitoring thresholds, kill-switch exercise."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "ASI01",
+      "name": "Agent Goal Hijack",
+      "layer": "Instruction / context",
+      "description": "Untrusted or adversarial content changes the agent goal or causes it to disregard the intended task boundary.",
+      "failure_mode": "The agent follows hostile instructions embedded in a prompt, email, web page or retrieved document.",
+      "controls": [
+        "C04",
+        "C02",
+        "C03",
+        "C09",
+        "C12"
+      ],
+      "critical_controls": [
+        "C04",
+        "C02"
+      ],
+      "recommendations": [
+        "Separate trusted policy from untrusted content.",
+        "Enforce server-side authorization for every action.",
+        "Test indirect prompt injection with benign canary documents."
+      ]
+    },
+    {
+      "id": "ASI02",
+      "name": "Tool Misuse and Exploitation",
+      "layer": "Tools / actions",
+      "description": "An agent uses a legitimate tool in an unsafe, unintended or unauthorised way.",
+      "failure_mode": "A model error or manipulated instruction results in an unapproved query, write, message or transaction.",
+      "controls": [
+        "C02",
+        "C01",
+        "C03",
+        "C05",
+        "C09",
+        "C12"
+      ],
+      "critical_controls": [
+        "C02",
+        "C01"
+      ],
+      "recommendations": [
+        "Use a small tool allowlist and validate every argument server-side.",
+        "Separate read and write permissions.",
+        "Require approval for high-impact actions."
+      ]
+    },
+    {
+      "id": "ASI03",
+      "name": "Identity and Privilege Abuse",
+      "layer": "Identity / access",
+      "description": "An agent misuses, inherits or escalates delegated identity and privileges.",
+      "failure_mode": "The agent accesses resources outside the requesting user's scope or retains credentials too long.",
+      "controls": [
+        "C01",
+        "C02",
+        "C03",
+        "C09",
+        "C12"
+      ],
+      "critical_controls": [
+        "C01",
+        "C02"
+      ],
+      "recommendations": [
+        "Issue agent-specific short-lived scoped credentials.",
+        "Enforce user and tenant authorization at each resource boundary.",
+        "Test revocation, expiry and cross-tenant denial."
+      ]
+    },
+    {
+      "id": "ASI04",
+      "name": "Agentic Supply Chain Vulnerabilities",
+      "layer": "Dependencies / tools / models",
+      "description": "Compromised or poorly governed frameworks, plugins, models or dependencies undermine the agent.",
+      "failure_mode": "A dependency or tool update introduces an unsafe capability or exploitable component.",
+      "controls": [
+        "C11",
+        "C01",
+        "C02",
+        "C09",
+        "C12"
+      ],
+      "critical_controls": [
+        "C11"
+      ],
+      "recommendations": [
+        "Pin and verify versions and artifact provenance.",
+        "Review permissions and maintain an SBOM.",
+        "Test upgrades before production."
+      ]
+    },
+    {
+      "id": "ASI05",
+      "name": "Unexpected Code Execution (RCE)",
+      "layer": "Runtime / execution",
+      "description": "Agent-driven code or tool execution escapes intended boundaries.",
+      "failure_mode": "Generated code or tool arguments reach a runtime with excessive host, filesystem or network privileges.",
+      "controls": [
+        "C05",
+        "C02",
+        "C11",
+        "C01",
+        "C09",
+        "C12"
+      ],
+      "critical_controls": [
+        "C05",
+        "C02"
+      ],
+      "recommendations": [
+        "Use disposable sandboxes with restricted filesystem/network access.",
+        "Never expose production secrets or host mounts.",
+        "Require review before production deployment."
+      ]
+    },
+    {
+      "id": "ASI06",
+      "name": "Memory and Context Poisoning",
+      "layer": "Memory / retrieval",
+      "description": "Untrusted or manipulated information contaminates persistent memory or retrieved context.",
+      "failure_mode": "A poisoned memory item or retrieval source changes future agent decisions.",
+      "controls": [
+        "C06",
+        "C04",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "critical_controls": [
+        "C06",
+        "C04"
+      ],
+      "recommendations": [
+        "Store provenance and trust labels for each memory item.",
+        "Restrict writes and apply TTL, quarantine and review.",
+        "Test whether poisoned content alters future tasks."
+      ]
+    },
+    {
+      "id": "ASI07",
+      "name": "Insecure Inter-Agent Communication",
+      "layer": "Multi-agent orchestration",
+      "description": "Messages between agents are spoofed, replayed, malformed or trusted without checking identity and scope.",
+      "failure_mode": "A downstream agent accepts instructions from an unverified peer or outside its contract.",
+      "controls": [
+        "C07",
+        "C01",
+        "C02",
+        "C09",
+        "C12"
+      ],
+      "critical_controls": [
+        "C07",
+        "C01"
+      ],
+      "recommendations": [
+        "Authenticate agents and validate message sender, recipient and purpose.",
+        "Use typed schemas and reject unexpected fields.",
+        "Limit delegation depth and permissions."
+      ]
+    },
+    {
+      "id": "ASI08",
+      "name": "Cascading Failures",
+      "layer": "Orchestration / reliability",
+      "description": "A local error, hallucination, retry loop or compromised component propagates across agents or systems.",
+      "failure_mode": "Retries or downstream agents amplify a mistake, causing repeated actions, cost spikes or service disruption.",
+      "controls": [
+        "C08",
+        "C09",
+        "C12",
+        "C03",
+        "C02"
+      ],
+      "critical_controls": [
+        "C08",
+        "C09"
+      ],
+      "recommendations": [
+        "Set strict step, retry, token and cost budgets.",
+        "Add timeouts, idempotency checks and circuit breakers.",
+        "Stop workflows on repeated anomalies."
+      ]
+    },
+    {
+      "id": "ASI09",
+      "name": "Human-Agent Trust Exploitation",
+      "layer": "Human oversight / output",
+      "description": "Users over-trust persuasive agent output or approve actions without sufficient context.",
+      "failure_mode": "A person accepts an incorrect recommendation or approves a consequential action without understanding it.",
+      "controls": [
+        "C03",
+        "C10",
+        "C09",
+        "C12"
+      ],
+      "critical_controls": [
+        "C03"
+      ],
+      "recommendations": [
+        "Show evidence and the exact action before approval.",
+        "Separate recommendation from execution and allow rejection.",
+        "Train operators and sample approval quality."
+      ]
+    },
+    {
+      "id": "ASI10",
+      "name": "Rogue Agents",
+      "layer": "Runtime / governance",
+      "description": "An agent operates outside its intended objective, permissions or operational boundary.",
+      "failure_mode": "A compromised or misconfigured agent continues acting beyond authorised scope.",
+      "controls": [
+        "C01",
+        "C02",
+        "C08",
+        "C09",
+        "C12",
+        "C03"
+      ],
+      "critical_controls": [
+        "C01",
+        "C02",
+        "C12"
+      ],
+      "recommendations": [
+        "Use independent policy enforcement outside the model.",
+        "Implement a tested kill switch and credential revocation.",
+        "Monitor behavioural deviations and retain action traces."
+      ]
+    }
+  ]
+}
