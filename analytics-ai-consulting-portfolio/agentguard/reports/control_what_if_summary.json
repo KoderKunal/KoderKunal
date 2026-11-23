@@ -1,0 +1,10 @@
+{
+  "profile": "Software engineering agent",
+  "baseline_average_residual": 50.35,
+  "baseline_max_residual": 60.47,
+  "baseline_highest_band": "High",
+  "all_controls_at_maturity_3_average_residual": 28.52,
+  "all_controls_at_maturity_3_max_residual": 32.58,
+  "all_controls_at_maturity_3_highest_band": "Moderate",
+  "interpretation": "Illustrative what-if only. Every mapped control is assigned maturity 3 (tested with evidence) for sensitivity analysis; this is not an observed system state, measured risk reduction or evidence that controls have actually been implemented."
+}
