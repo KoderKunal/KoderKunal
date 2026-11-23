@@ -1,52 +1,72 @@
 # Analytics & AI Consulting Portfolio
 
-Two reproducible projects structured around the full analytics lifecycle:
+**Two reproducible portfolio projects** connecting business questions to the full analytics lifecycle: descriptive → diagnostic → predictive → prescriptive.
 
-1. **Descriptive:** What happened? Build reliable KPIs and summaries.
-2. **Diagnostic:** Why might patterns differ? Apply statistical tests and examine associations.
-3. **Predictive:** What might happen? Train and evaluate a machine-learning model on held-out synthetic data.
-4. **Prescriptive:** What options could be considered? Translate outputs into transparent, human-reviewed scenarios.
+All included datasets are synthetic educational data. They do not represent real employees, employers, client engagements, or investment outcomes.
 
-## Project 1 — Workforce Intelligence & Attrition Prediction
+## Projects
 
-**Business question:** Which synthetic workforce segments show different attrition rates, how do selected variables relate to attrition, and how can an interpretable model support exploratory analysis?
+### 1. [Workforce Intelligence & Attrition Prediction](./project-01-workforce-intelligence/README.md)
+Analyse synthetic workforce patterns and attrition; apply inferential statistics and logistic regression with explicit limits on HR use.
 
-- Excel: Power Query cleaning, PivotTables, department KPIs and charts.
-- MySQL 8.0: staging table, relational joins, analytical views, CTEs, window functions, stored function and stored procedure.
-- Python: EDA, Welch t-test, one-way ANOVA, chi-square, correlation and logistic-regression classification.
-- Automation: n8n scheduled summary template and a bounded, aggregate-only local Ollama assistant.
-- Responsible use: no employee-level assistant context and no automated employment decisions.
+- [Python analysis.py](./project-01-workforce-intelligence/analysis.py)
+- [MySQL schema](./project-01-workforce-intelligence/schema.sql) · [SQL analytics](./project-01-workforce-intelligence/queries.sql)
+- [Excel / Power Query guide](./excel/README.md)
+- [n8n workflow](./n8n/workforce_daily_summary.json)
 
-## Project 2 — Enterprise AI Value & Investment Prioritisation
+### 2. [Enterprise AI Value & Investment Prioritisation](./project-02-ai-value-portfolio/README.md)
+Compare hypothetical AI initiatives by cost, benefit, readiness, adoption, risk and budget.
 
-**Business question:** How could a hypothetical enterprise compare candidate AI initiatives by implementation cost, estimated annual benefit, readiness, adoption and governance risk under a limited budget?
+- [Python analysis.py](./project-02-ai-value-portfolio/analysis.py)
+- [MySQL schema](./project-02-ai-value-portfolio/schema.sql) · [SQL analytics](./project-02-ai-value-portfolio/queries.sql)
+- [n8n workflow](./n8n/ai_portfolio_daily_summary.json)
 
-- Excel: Power Query, PivotTables, ROI analysis, sector reporting and scenario views.
-- MySQL 8.0: relational portfolio table, sector views, joins, window functions, stored function and procedure.
-- Python: EDA, t-test, ANOVA, correlation, Random Forest regression and 0/1 budget-constrained selection.
-- Automation: n8n sector-summary template and a bounded local Ollama assistant.
-- Decision transparency: objective, budget and rounded-cost assumption are explicit; results are not investment advice.
+## Tested outputs from synthetic generators
 
-## Tested synthetic-data outputs
-
-These results were produced by executing the Python scripts against the included synthetic-data generators:
-
-| Project | Test result | Value |
+| Project | Metric | Result |
 |---|---|---:|
 | Workforce | Logistic-regression holdout ROC-AUC | 0.716 |
 | AI portfolio | Random Forest holdout R² | 0.912 |
 | AI portfolio | Random Forest holdout MAE | ₹11.40 lakh |
 
-These results demonstrate code execution on intentionally generated data only. They do not establish real-world predictive performance or business impact.
+The values above are synthetic-data demonstrations only. They are not evidence of real-world model performance.
 
-## Repository layout
+## Run the code
 
-- `project-01-workforce-intelligence/` — workforce data generator, analysis, model and project instructions.
-- `project-02-ai-value-portfolio/` — AI initiative generator, analysis, model and prioritisation.
-- `README.md` — project design, limitations and reproducibility.
+Use Python 3.10+. From this directory:
 
-## Reproducibility
+```bash
+pip install -r requirements.txt
+python project-01-workforce-intelligence/analysis.py
+python project-02-ai-value-portfolio/analysis.py
+streamlit run streamlit_app.py
+```
 
-Use Python 3.10+ and install the dependencies listed in the repository root `requirements.txt`. Run the project scripts in order: data generation → statistical analysis → model training/evaluation. The scripts regenerate the CSVs and JSON/CSV outputs.
+Both project scripts generate their own synthetic data under their respective `data/` folders and save results under `outputs/`.
 
-**Synthetic data only.** Do not use these models for employee decisions, live investments or claims about actual consulting-firm clients. For real use, obtain lawful representative data, validate assumptions and model performance, assess fairness/security/privacy, and retain accountable human review.
+## Local AI assistant
+
+Install Ollama and pull a local model such as `qwen2.5:3b`, then run:
+
+```bash
+ollama serve
+python local_analytics_agent.py --project workforce --question "Which departments have the highest attrition?"
+python local_analytics_agent.py --project ai_portfolio --question "Which sectors have the strongest synthetic ROI?"
+```
+
+The assistant is allow-listed and aggregate-only. It does not make HR or investment decisions. See [n8n workflow notes](./n8n/README.md) before importing workflows; configure MySQL credentials and the local Ollama endpoint and test manually first.
+
+## Excel
+
+See the [Excel implementation guide](./excel/README.md) and the Power Query M examples. The separate VBA module is [RefreshPortfolio.bas](./excel/RefreshPortfolio.bas). Review macros before running and follow your organisation's macro policy.
+
+## Industry context
+
+The project themes are inspired by public materials on AI transformation, decision science, value realization and responsible AI from [Accenture](./FIRM_ALIGNMENT.md), Deloitte and EY. They are not presented as work completed for those firms.
+
+## Limitations
+
+- Synthetic data only; model results do not generalise to real populations or portfolios.
+- Statistical association does not establish causality.
+- The AI-initiative selection exercise uses an illustrative 0/1 knapsack objective and rounded cost units; it is not investment advice.
+- Real deployments require representative lawful data, validation, security, privacy, fairness and accountable human review.
