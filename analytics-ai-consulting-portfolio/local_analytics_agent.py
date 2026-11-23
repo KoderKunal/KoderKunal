@@ -37,7 +37,8 @@ def main():
         raise FileNotFoundError("Run the selected project's analysis.py first.")
     df = pd.read_csv(path)
     names = list(tools)
-    selected = ollama("Choose exactly one tool name from this allow-list: " + ", ".join(names) + ". Return only its name. Question: " + args.question).strip().split()[0].strip("'").strip('"')
+    tool_text = ollama("Choose exactly one tool name from this allow-list: " + ", ".join(names) + ". Return only its name. Question: " + args.question).strip()
+    selected = tool_text.split()[0].strip("'").strip('"') if tool_text else names[-1]
     if selected not in tools:
         selected = names[-1]
     evidence = tools[selected](df)
