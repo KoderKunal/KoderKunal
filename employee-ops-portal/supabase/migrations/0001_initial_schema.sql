@@ -160,6 +160,7 @@ create table if not exists public.audit_events (
 -- Composite organisation keys prevent cross-tenant references even if a manager
 -- accidentally selects a user/project from another organisation.
 alter table public.profiles add constraint profiles_id_org_unique unique (id, organization_id);
+alter table public.profiles add constraint profiles_manager_org_fk foreign key (manager_id, organization_id) references public.profiles(id, organization_id);
 alter table public.projects add constraint projects_id_org_unique unique (id, organization_id);
 alter table public.project_requirements add constraint requirements_id_org_unique unique (id, organization_id);
 alter table public.tasks add constraint tasks_id_org_unique unique (id, organization_id);
@@ -377,13 +378,59 @@ using (private.is_manager_or_admin(organization_id));
 create policy audit_insert_member on public.audit_events for insert to authenticated
 with check (actor_id = (select auth.uid()) and private.is_active_member(organization_id));
 
+ 
+-- Append minimal audit metadata for business-record changes. Do not log passwords,
+-- access tokens, full deliverable content or sensitive employee narrative.
+create or replace function private.write_audit_event()
+returns trigger language plpgsql security definer set search_path = ''
+as $
+declare
+  v_org uuid;
+  v_entity uuid;
+  v_action text := lower(TG_OP);
+begin
+  if TG_OP = 'DELETE' then
+    v_org := OLD.organization_id;
+    v_entity := OLD.id;
+    insert into public.audit_events(organization_id,actor_id,entity_type,entity_id,action,details)
+      values(v_org,auth.uid(),TG_TABLE_NAME,v_entity,v_action,jsonb_build_object('logged_at',now()));
+    return OLD;
+  else
+    v_org := NEW.organization_id;
+    v_entity := NEW.id;
+    insert into public.audit_events(organization_id,actor_id,entity_type,entity_id,action,details)
+      values(v_org,auth.uid(),TG_TABLE_NAME,v_entity,v_action,jsonb_build_object('logged_at',now()));
+    return NEW;
+  end if;
+end;
+$;
+revoke all on function private.write_audit_event() from public, anon, authenticated;
+
+create trigger audit_projects after insert or update or delete on public.projects
+  for each row execute function private.write_audit_event();
+create trigger audit_requirements after insert or update or delete on public.project_requirements
+  for each row execute function private.write_audit_event();
+create trigger audit_tasks after insert or update or delete on public.tasks
+  for each row execute function private.write_audit_event();
+create trigger audit_attendance after insert or update or delete on public.attendance_sessions
+  for each row execute function private.write_audit_event();
+create trigger audit_work_logs after insert or update or delete on public.work_logs
+  for each row execute function private.write_audit_event();
+create trigger audit_progress_updates after insert or update or delete on public.progress_updates
+  for each row execute function private.write_audit_event();
+create trigger audit_deliverables after insert or update or delete on public.deliverables
+  for each row execute function private.write_audit_event();
+create trigger audit_review_cycles after insert or update or delete on public.review_cycles
+  for each row execute function private.write_audit_event();
+
 -- Bootstrap one organisation and the initial admin user. Replace both placeholders.
 -- Create the first Auth user using Supabase Dashboard > Authentication > Users > Add user.
 -- Then replace the values below and run this block.
 do $bootstrap$
-declare v_org uuid;
-declare v_user_text text := 'REPLACE_WITH_FIRST_AUTH_USER_UUID';
-declare v_user uuid;
+declare
+  v_org uuid;
+  v_user_text text := 'REPLACE_WITH_FIRST_AUTH_USER_UUID';
+  v_user uuid;
 begin
   if v_user_text = 'REPLACE_WITH_FIRST_AUTH_USER_UUID' then
     raise notice 'Bootstrap skipped. Replace the user UUID before running this block.';
