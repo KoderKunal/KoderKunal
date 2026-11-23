@@ -1,0 +1,11 @@
+risk_id,risk,inherent_score,inherent_band,control_effectiveness_pct,control_maturity_coverage_pct,tested_controls,residual_score,residual_band,mandatory_gaps
+ASI05,Unexpected Code Execution (RCE),82.5,Critical,26.5,25.0,1/6,60.47,High,C05;C02
+ASI08,Cascading Failures,75.0,Critical,19.0,25.0,1/5,60.75,High,C08;C09
+ASI10,Rogue Agents,80.0,Critical,28.9,25.0,1/6,56.88,High,C01;C02;C12
+ASI02,Tool Misuse and Exploitation,75.0,Critical,25.6,25.0,1/6,55.80,High,C02;C01
+ASI01,Agent Goal Hijack,75.0,Critical,23.5,25.0,1/5,57.38,High,C04;C02
+ASI03,Identity and Privilege Abuse,71.25,High,25.6,25.0,1/5,53.01,High,C01;C02
+ASI04,Agentic Supply Chain Vulnerabilities,68.75,High,21.3,25.0,1/5,54.11,High,C11
+ASI06,Memory and Context Poisoning,68.75,High,20.0,25.0,1/5,55.00,High,C06;C04
+ASI07,Insecure Inter-Agent Communication,50.0,High,22.5,25.0,1/5,38.75,Moderate,C07;C01
+ASI09,Human-Agent Trust Exploitation,61.25,High,17.0,25.0,1/4,50.84,High,C03
