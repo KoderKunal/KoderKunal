@@ -162,7 +162,7 @@ export default function App() {
   });
   const checkOut=run(async()=>{
     if(!openAttendance)throw new Error("No open attendance session.");
-    const {error}=await supabase!.from("attendance_sessions").update({checked_out_at:new Date().toISOString()}).eq("id",openAttendance.id);
+    const {error}=await supabase!.rpc("checkout_attendance",{p_session_id:openAttendance.id});
     if(error)throw error;flash("success","Attendance check-out recorded.");
   });
   const saveTaskUpdate=run(async()=>{
