@@ -21,6 +21,18 @@ Compare hypothetical AI initiatives by cost, benefit, readiness, adoption, risk 
 - [MySQL schema](./project-02-ai-value-portfolio/schema.sql) · [SQL analytics](./project-02-ai-value-portfolio/queries.sql)
 - [n8n workflow](./n8n/ai_portfolio_daily_summary.json)
 
+### 3. [AgentGuard — AI Agent Governance & Risk Assessment](./agentguard/README.md)
+
+A rule-based, explainable risk assessment prototype covering ten OWASP Agentic Applications risk categories. It evaluates six exposure dimensions, 12 governance controls, control maturity, residual risk and remediation evidence.
+
+- [Interactive Streamlit dashboard](./agentguard/app.py)
+- [Python scoring engine](./agentguard/risk_engine.py)
+- [Model card and limitations](./agentguard/MODEL_CARD.md)
+- [References](./agentguard/REFERENCES.md)
+- [Controlled test plan](./agentguard/data/red_team_test_plan.csv)
+
+AgentGuard scores are heuristic indices, not calibrated probabilities or evidence of security certification.
+
 ## Tested outputs from synthetic generators
 
 | Project | Metric | Result |
