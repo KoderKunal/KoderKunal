@@ -375,6 +375,84 @@ revoke all on function public.manager_close_review_cycle(uuid) from public, anon
 grant execute on function public.manager_close_review_cycle(uuid) to authenticated;
 
 
+
+-- Deliverable review is a manager-only operation checked inside the database.
+create or replace function public.manager_review_deliverable(
+  p_deliverable_id uuid, p_status text, p_feedback text default ''
+)
+returns void language plpgsql security definer set search_path = ''
+as $review_delivery$
+declare v_item public.deliverables%rowtype;
+begin
+  if p_status not in ('approved','changes_requested') then
+    raise exception 'Invalid deliverable review status';
+  end if;
+  select * into v_item from public.deliverables where id = p_deliverable_id for update;
+  if not found then raise exception 'Deliverable not found'; end if;
+  if not private.is_manager_or_admin(v_item.organization_id) then
+    raise exception 'Only an organisation manager can review deliverables';
+  end if;
+  if v_item.status not in ('submitted','in_review') then
+    raise exception 'Deliverable is not awaiting review';
+  end if;
+  if p_status = 'changes_requested' and length(trim(coalesce(p_feedback,''))) = 0 then
+    raise exception 'Change request feedback is required';
+  end if;
+  update public.deliverables set status = p_status,
+    manager_feedback = coalesce(p_feedback,''),
+    reviewed_by = (select auth.uid()), reviewed_at = now()
+  where id = p_deliverable_id;
+end;
+$review_delivery$;
+revoke all on function public.manager_review_deliverable(uuid,text,text) from public, anon;
+grant execute on function public.manager_review_deliverable(uuid,text,text) to authenticated;
+
+-- Employee response is a dedicated operation and cannot alter manager evidence.
+create or replace function public.employee_respond_to_review(
+  p_review_id uuid, p_response text
+)
+returns void language plpgsql security definer set search_path = ''
+as $employee_response$
+declare v_review public.review_cycles%rowtype;
+begin
+  if length(trim(coalesce(p_response,''))) = 0 then
+    raise exception 'Employee response cannot be blank';
+  end if;
+  select * into v_review from public.review_cycles where id = p_review_id for update;
+  if not found then raise exception 'Review cycle not found'; end if;
+  if v_review.employee_id <> (select auth.uid()) then
+    raise exception 'Only the employee can submit their own response';
+  end if;
+  if v_review.status not in ('open','employee_response') then
+    raise exception 'This review cycle is no longer accepting responses';
+  end if;
+  update public.review_cycles set employee_response = p_response,
+    status = 'employee_response'
+  where id = p_review_id;
+end;
+$employee_response$;
+revoke all on function public.employee_respond_to_review(uuid,text) from public, anon;
+grant execute on function public.employee_respond_to_review(uuid,text) to authenticated;
+
+-- Manager-only closure; the database supplies the timestamp.
+create or replace function public.manager_close_review_cycle(p_review_id uuid)
+returns void language plpgsql security definer set search_path = ''
+as $close_review$
+declare v_review public.review_cycles%rowtype;
+begin
+  select * into v_review from public.review_cycles where id = p_review_id for update;
+  if not found then raise exception 'Review cycle not found'; end if;
+  if not private.is_manager_or_admin(v_review.organization_id) then
+    raise exception 'Only an organisation manager can close a review cycle';
+  end if;
+  if v_review.status = 'closed' then raise exception 'Review cycle is already closed'; end if;
+  update public.review_cycles set status = 'closed', closed_at = now()
+    where id = p_review_id;
+end;
+$close_review$;
+revoke all on function public.manager_close_review_cycle(uuid) from public, anon;
+grant execute on function public.manager_close_review_cycle(uuid) to authenticated;
+
 -- RLS enabled on every organisation/business table.
 alter table public.organizations enable row level security;
 alter table public.profiles enable row level security;
