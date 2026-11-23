@@ -71,6 +71,8 @@ on conflict (id) do update set
 
 For managers, change role to `manager`. For additional administrators, use `admin` sparingly. Manager and admin accounts can view organisation-wide project and employee operational records.
 
+After the profile row has been created, ask the invited person to open the invitation email on their own device and follow its link. Once WorkLedger opens with their signed-in session, they can choose **Account & password** in the portal and set a personal password of at least 12 characters. If they open the portal before you create their profile row, they will see **Account setup pending**; finish provisioning and ask them to sign out and sign in again.
+
 To deactivate someone, set `active = false` on their profile and revoke their Auth access. Do not delete historical work or audit records unless your retention policy requires it.
 
 ## 5. Make the portal invitation-only
