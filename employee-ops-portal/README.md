@@ -59,6 +59,8 @@ The intended GitHub Pages URL is:
 
 https://koderkunal.github.io/KoderKunal/
 
+**Current status:** frontend TypeScript/production build passes and the database migration passes a PostgreSQL 16 smoke test in GitHub Actions. The live deployment is not active yet because the Supabase project URL/publishable key secrets and GitHub Pages publishing source still need administrator setup.
+
 This URL becomes a working sign-in portal after the GitHub Pages workflow succeeds with valid Supabase settings and the database is provisioned. Until those external setup steps are completed, the hosted page will not authenticate users or contain your organisation data.
 
 ## Local development
