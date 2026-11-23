@@ -156,6 +156,35 @@ create table if not exists public.audit_events (
   created_at timestamptz not null default now()
 );
 
+ 
+-- Composite organisation keys prevent cross-tenant references even if a manager
+-- accidentally selects a user/project from another organisation.
+alter table public.profiles add constraint profiles_id_org_unique unique (id, organization_id);
+alter table public.projects add constraint projects_id_org_unique unique (id, organization_id);
+alter table public.project_requirements add constraint requirements_id_org_unique unique (id, organization_id);
+alter table public.tasks add constraint tasks_id_org_unique unique (id, organization_id);
+alter table public.tasks add constraint tasks_assignee_org_fk foreign key (assigned_to, organization_id) references public.profiles(id, organization_id);
+alter table public.tasks add constraint tasks_project_org_fk foreign key (project_id, organization_id) references public.projects(id, organization_id);
+alter table public.tasks add constraint tasks_requirement_org_fk foreign key (requirement_id, organization_id) references public.project_requirements(id, organization_id);
+alter table public.projects add constraint projects_creator_org_fk foreign key (created_by, organization_id) references public.profiles(id, organization_id);
+alter table public.project_requirements add constraint requirements_creator_org_fk foreign key (created_by, organization_id) references public.profiles(id, organization_id);
+alter table public.project_requirements add constraint requirements_project_org_fk foreign key (project_id, organization_id) references public.projects(id, organization_id);
+alter table public.project_requirements add constraint requirements_owner_org_fk foreign key (owner_id, organization_id) references public.profiles(id, organization_id);
+alter table public.tasks add constraint tasks_creator_org_fk foreign key (created_by, organization_id) references public.profiles(id, organization_id);
+alter table public.attendance_sessions add constraint attendance_user_org_fk foreign key (user_id, organization_id) references public.profiles(id, organization_id);
+alter table public.work_logs add constraint work_logs_user_org_fk foreign key (user_id, organization_id) references public.profiles(id, organization_id);
+alter table public.work_logs add constraint work_logs_project_org_fk foreign key (project_id, organization_id) references public.projects(id, organization_id);
+alter table public.work_logs add constraint work_logs_task_org_fk foreign key (task_id, organization_id) references public.tasks(id, organization_id);
+alter table public.progress_updates add constraint progress_user_org_fk foreign key (user_id, organization_id) references public.profiles(id, organization_id);
+alter table public.progress_updates add constraint progress_project_org_fk foreign key (project_id, organization_id) references public.projects(id, organization_id);
+alter table public.deliverables add constraint deliverables_submitter_org_fk foreign key (submitted_by, organization_id) references public.profiles(id, organization_id);
+alter table public.deliverables add constraint deliverables_project_org_fk foreign key (project_id, organization_id) references public.projects(id, organization_id);
+alter table public.deliverables add constraint deliverables_task_org_fk foreign key (task_id, organization_id) references public.tasks(id, organization_id);
+alter table public.deliverables add constraint deliverables_reviewer_org_fk foreign key (reviewed_by, organization_id) references public.profiles(id, organization_id);
+alter table public.review_cycles add constraint reviews_employee_org_fk foreign key (employee_id, organization_id) references public.profiles(id, organization_id);
+alter table public.review_cycles add constraint reviews_initiator_org_fk foreign key (initiated_by, organization_id) references public.profiles(id, organization_id);
+alter table public.audit_events add constraint audit_actor_org_fk foreign key (actor_id, organization_id) references public.profiles(id, organization_id);
+
 create index if not exists profiles_org_role_idx on public.profiles(organization_id,role);
 create index if not exists projects_org_status_idx on public.projects(organization_id,status);
 create index if not exists tasks_assignee_status_idx on public.tasks(assigned_to,status);
@@ -211,7 +240,7 @@ create or replace function public.update_task_progress(
   p_task_id uuid, p_status text, p_percent_complete integer,
   p_blocker text default '', p_update_note text default ''
 )
-returns void language plpgsql security invoker set search_path = ''
+returns void language plpgsql security definer set search_path = ''
 as $$
 declare v_task public.tasks%rowtype;
 begin
@@ -223,6 +252,9 @@ begin
   end if;
   select * into v_task from public.tasks where id = p_task_id for update;
   if not found then raise exception 'Task not found or access denied'; end if;
+  if not private.is_active_member(v_task.organization_id) then
+    raise exception 'Not authorised: inactive or unrelated organisation member';
+  end if;
   if v_task.assigned_to <> (select auth.uid())
      and not private.is_manager_or_admin(v_task.organization_id) then
     raise exception 'Not authorised to update this task';
@@ -236,6 +268,7 @@ begin
     where id = p_task_id;
 end;
 $$;
+revoke all on function public.update_task_progress(uuid,text,integer,text,text) from public, anon;
 grant execute on function public.update_task_progress(uuid,text,integer,text,text) to authenticated;
 
 -- RLS enabled on every organisation/business table.
@@ -264,6 +297,7 @@ grant update (full_name,timezone) on public.profiles to authenticated;
 grant update (checked_out_at,note) on public.attendance_sessions to authenticated;
 grant update (status,manager_feedback,reviewed_by,reviewed_at) on public.deliverables to authenticated;
 grant update (employee_response,status) on public.review_cycles to authenticated;
+grant update (evidence_summary,status,closed_at) on public.review_cycles to authenticated;
 
 create policy org_read_member on public.organizations for select to authenticated
 using (id = private.current_org_id());
@@ -334,6 +368,9 @@ with check (private.is_manager_or_admin(organization_id) and initiated_by = (sel
 create policy reviews_employee_response on public.review_cycles for update to authenticated
 using (employee_id = (select auth.uid()) and status in ('open','employee_response'))
 with check (employee_id = (select auth.uid()) and status in ('employee_response','open'));
+create policy reviews_manager_update on public.review_cycles for update to authenticated
+using (private.is_manager_or_admin(organization_id))
+with check (private.is_manager_or_admin(organization_id));
 
 create policy audit_read_manager on public.audit_events for select to authenticated
 using (private.is_manager_or_admin(organization_id));
@@ -345,12 +382,14 @@ with check (actor_id = (select auth.uid()) and private.is_active_member(organiza
 -- Then replace the values below and run this block.
 do $bootstrap$
 declare v_org uuid;
-declare v_user uuid := 'REPLACE_WITH_FIRST_AUTH_USER_UUID';
+declare v_user_text text := 'REPLACE_WITH_FIRST_AUTH_USER_UUID';
+declare v_user uuid;
 begin
-  if v_user::text = 'REPLACE_WITH_FIRST_AUTH_USER_UUID' then
+  if v_user_text = 'REPLACE_WITH_FIRST_AUTH_USER_UUID' then
     raise notice 'Bootstrap skipped. Replace the user UUID before running this block.';
     return;
   end if;
+  v_user := v_user_text::uuid;
   insert into public.organizations(name) values ('Your Organisation')
     returning id into v_org;
   insert into public.profiles(id,organization_id,full_name,email,role)
