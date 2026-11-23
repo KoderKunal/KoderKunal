@@ -204,7 +204,7 @@ export default function App() {
   });
   const reviewDecision=async(d:Delivery,status:"approved"|"changes_requested")=>{
     const feedback=window.prompt(status==="approved"?"Optional approval note":"Describe the changes requested"); if(status==="changes_requested"&&!feedback?.trim())return;
-    const {error}=await supabase!.from("deliverables").update({status,manager_feedback:feedback||"",reviewed_by:profile!.id,reviewed_at:new Date().toISOString()}).eq("id",d.id);
+    const {error}=await supabase!.rpc("manager_review_deliverable",{p_deliverable_id:d.id,p_status:status,p_feedback:feedback||""});
     if(error)flash("error",error.message);else{flash("success","Deliverable review saved.");refresh();}
   };
   const createReview=run(async()=>{
@@ -214,12 +214,12 @@ export default function App() {
   });
   const closeReview=async(r:Review)=>{
     if(!window.confirm("Close this review cycle? The employee response and evidence will remain in the record."))return;
-    const {error}=await supabase!.from("review_cycles").update({status:"closed",closed_at:new Date().toISOString()}).eq("id",r.id);
+    const {error}=await supabase!.rpc("manager_close_review_cycle",{p_review_id:r.id});
     if(error)flash("error",error.message);else{flash("success","Review cycle closed.");refresh();}
   };
   const employeeResponse=async(r:Review)=>{
     const response=window.prompt("Add your response or context for the review cycle"); if(!response?.trim())return;
-    const {error}=await supabase!.from("review_cycles").update({employee_response:response,status:"employee_response"}).eq("id",r.id);
+    const {error}=await supabase!.rpc("employee_respond_to_review",{p_review_id:r.id,p_response:response});
     if(error)flash("error",error.message);else{flash("success","Your response was saved.");refresh();}
   };
 
