@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   Activity, AlarmClock, ArrowUpRight, BarChart3, BriefcaseBusiness, CalendarCheck,
   CheckCircle2, CircleAlert, ClipboardList, Clock3, FileCheck2, FileText,
@@ -16,7 +16,7 @@ type Review = { id:string; employee_id:string; title:string; purpose:string; evi
 type Attendance = { id:string; checked_in_at:string; checked_out_at:string|null };
 type Notice = { kind:"success"|"error"|"info"; text:string };
 
-const today = () => new Date().toLocaleDateString("en-CA");
+const today = () => { const d=new Date(); return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-"); };
 const dateTime = (x?:string|null) => x ? new Date(x).toLocaleString() : "—";
 const hoursLabel = (n:number) => `${n.toFixed(2)} h`;
 const isManager = (p:Profile|null) => p?.role==="manager" || p?.role==="admin";
@@ -146,7 +146,7 @@ export default function App() {
   const visibleDeliveries=isManagerUser?deliveries:deliveries.filter(d=>d.submitted_by===session?.user?.id);
   const visibleReviews=isManagerUser?reviews:reviews.filter(r=>r.employee_id===session?.user?.id);
 
-  const signIn=async(e:React.FormEvent)=>{
+  const signIn=async(e:FormEvent)=>{
     e.preventDefault(); if(!supabase)return;
     setBusy(true);
     const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
@@ -154,7 +154,7 @@ export default function App() {
     if(error) flash("error",error.message); else flash("success","Signed in successfully.");
   };
   const signOut=async()=>{await supabase?.auth.signOut();setSession(null);setProfile(null);};
-  const run=(fn:()=>Promise<void>)=>async(e:React.FormEvent)=>{e.preventDefault();setBusy(true);try{await fn();await refresh();}catch(err:any){flash("error",err.message||"Action failed.");}finally{setBusy(false);}};
+  const run=(fn:()=>Promise<void>)=>async(e:FormEvent)=>{e.preventDefault();setBusy(true);try{await fn();await refresh();}catch(err:any){flash("error",err.message||"Action failed.");}finally{setBusy(false);}};
 
   const checkIn=run(async()=>{
     const {error}=await supabase!.from("attendance_sessions").insert({organization_id:profile!.organization_id,user_id:profile!.id});
@@ -166,6 +166,7 @@ export default function App() {
     if(error)throw error;flash("success","Attendance check-out recorded.");
   });
   const saveTaskUpdate=run(async()=>{
+    if(!taskEdit) throw new Error("Select a task to update.");
     const {error}=await supabase!.rpc("update_task_progress",{p_task_id:taskEdit.id,p_status:taskEdit.status,p_percent_complete:taskEdit.percent_complete,p_blocker:taskEdit.blocker,p_update_note:taskEdit.update_note});
     if(error)throw error;flash("success","Task tracker updated.");
   });
@@ -285,7 +286,7 @@ export default function App() {
   </div>;
 }
 
-function Metric({icon,label,value,hint}:{icon?:React.ReactNode;label:string;value:string;hint?:string}){return <div className="metric-card">{icon&&<span className="metric-icon">{icon}</span>}<span className="metric-label">{label}</span><strong>{value}</strong>{hint&&<span className="muted small">{hint}</span>}</div>}
+function Metric({icon,label,value,hint}:{icon?:ReactNode;label:string;value:string;hint?:string}){return <div className="metric-card">{icon&&<span className="metric-icon">{icon}</span>}<span className="metric-label">{label}</span><strong>{value}</strong>{hint&&<span className="muted small">{hint}</span>}</div>}
 function PanelTitle({title,subtitle}:{title:string;subtitle?:string}){return <div className="panel-title"><div><h3>{title}</h3>{subtitle&&<p className="muted">{subtitle}</p>}</div></div>}
 function Quick({title,subtitle,onClick}:{title:string;subtitle:string;onClick:()=>void}){return <button className="quick-link" onClick={onClick}><span><b>{title}</b><small>{subtitle}</small></span><ArrowUpRight size={16}/></button>}
 function StatusPill({value}:{value:string}){const cls=["approved","done","completed","met","closed"].includes(value)?"good":["blocked","changes_requested"].includes(value)?"bad":["in_progress","in_review","employee_response"].includes(value)?"info":"neutral";return <span className={`status-pill ${cls}`}>{value.replace(/_/g," ")}</span>}
